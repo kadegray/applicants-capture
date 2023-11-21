@@ -1,4 +1,23 @@
 <form class="min-w-150 max-w-800 w-full" [formGroup]="form">
+  <div class="flex -mt-2">
+    <div class="flex w-full">
+      <mat-checkbox class="m-2" formControlName="primary">
+        Primary applicant
+      </mat-checkbox>
+    </div>
+    <div class="flex flex-row-reverse">
+      <button
+        *ngIf="hideCloseIcon"
+        mat-icon-button
+        color="primary"
+        aria-label="Remove this applicant"
+        (click)="removeClicked()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
   <div class="flex gap-3">
     <div class="flex-auto">
       <mat-form-field class="w-full">

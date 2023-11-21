@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -8,17 +8,14 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 })
 export class ApplicantsFormComponent {
 
-  numApplicants = 1;
+  applicantsCount = 1;
 
   applicantsFormGroup: FormGroup = new FormGroup({
     applicant1: new FormControl(null, Validators.required),
   });
 
-  primaryApplicantFormGroup: FormGroup = new FormGroup({});
-
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor() {
     const firstPrimaryControl: AbstractControl = new FormControl(true);
-    this.primaryApplicantFormGroup.addControl('applicant1', firstPrimaryControl);
     firstPrimaryControl.valueChanges.subscribe(value => this.primaryApplicantChange('applicant1', value));
   }
 
@@ -26,46 +23,58 @@ export class ApplicantsFormComponent {
     return Object.keys(this.applicantsFormGroup.controls);
   }
 
-  addAnotherApplicants() {
-    const applicantControl: AbstractControl = new FormControl({}, Validators.required);
-    const primaryControl: AbstractControl = new FormControl(false);
-
-    const num = this.numApplicants+1;
-    this.applicantsFormGroup.addControl(`applicant${num}`, applicantControl);
-
-    this.primaryApplicantFormGroup.addControl(`applicant${num}`, primaryControl);
-    primaryControl.valueChanges.subscribe(value => this.primaryApplicantChange(`applicant${num}`, value));
-    this.numApplicants = this.applicantsFormGroupKeys().length;
+  addAnotherApplicant() {
+    const applicantControl: AbstractControl = new FormControl(null, Validators.required);
+    this.applicantsCount += 1;
+    this.applicantsFormGroup.addControl(`applicant${this.applicantsCount}`, applicantControl);
   }
 
   removeApplicantControl(controlKey: string) {
     this.applicantsFormGroup.removeControl(controlKey);
-    this.numApplicants = this.applicantsFormGroupKeys().length;
 
-    const primary = this.primaryApplicantFormGroup.get(controlKey)?.getRawValue();
-    if (primary) {
-      const firstApplicantPrimaryControl = Object.keys(this.primaryApplicantFormGroup.getRawValue())?.[0];
-      this.primaryApplicantFormGroup.get(firstApplicantPrimaryControl)?.setValue(true);
-      this.cdr.markForCheck();
-    }
-  }
+    // if there is only one applicant then check primary on it
+    const allControls = this.applicantsFormGroupKeys();
+    if (allControls.length === 1) {
+      const onlyControl = allControls[0];
+      this.setPrimaryValue(onlyControl, true);
 
-  primaryApplicantChange(control: string, value: boolean) {
-
-    // only if true, checked
-    if (!value) {
       return;
     }
 
-    // uncheck all the others
-    const values = this.primaryApplicantFormGroup.getRawValue();
-    for(let c of Object.keys(values)) {
-      if (c !== control) {
-        this.primaryApplicantFormGroup.get(c)?.setValue(false);
-      }
+    // check the first one if none have primary checked
+    const numChecked = allControls
+      .map((control) => this.applicantsFormGroup.get(control)?.value?.primary)
+      .filter(value => value)
+      .length;
+    if (numChecked === 0) {
+      const firstControl = allControls[0];
+      this.setPrimaryValue(firstControl, true);
     }
+  }
 
-    this.cdr.markForCheck();
+  primaryApplicantChange(controlKey: string, value: any) {
+
+    const values = this.applicantsFormGroup.getRawValue();
+    for(let c of Object.keys(values)) {
+      if (c === controlKey) {
+        continue;
+      }
+
+      this.setPrimaryValue(c, false);
+    }
+  }
+
+  setPrimaryValue(controlKey: string, value: boolean = false) {
+    const control = this.applicantsFormGroup.get(controlKey);
+    let controlValue = control?.value ?? {};
+    controlValue.primary = value;
+    control?.setValue(controlValue);
+  }
+
+  isOnlyOneApplicant(applicantControl: string) {
+    const applicants = this.applicantsFormGroupKeys();
+
+    return applicants.length == 1 && applicantControl === applicants[0];
   }
 
   submit() {
@@ -78,12 +87,11 @@ export class ApplicantsFormComponent {
     for(let [index, applicantKey] of applicantKeys.entries()) {
 
       const applicantData = allApplicants[applicantKey];
-
-      const isPrimary = this.primaryApplicantFormGroup.get(applicantKey)?.value ? 'PRIMARY ' : '';
+      const isPrimary = applicantData.primary ? 'PRIMARY ' : '';
 
       console.log((index+1) + '/' + applicantKeys.length);
       console.log(`${isPrimary}Applicant Name: ${applicantData.firstName} ${applicantData.lastName}`);
-      console.log(`Mobile Number: ${applicantData.mobileNumber}`);
+      console.log(`Mobile Number: +61${applicantData.mobileNumber}`);
       console.log(`Email: ${applicantData.email}`);
       console.log('\n')
     }

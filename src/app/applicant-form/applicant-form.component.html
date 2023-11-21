@@ -1,0 +1,27 @@
+<form class="min-w-150 max-w-800 w-full" [formGroup]="form">
+  <div class="flex gap-3">
+    <div class="flex-auto">
+      <mat-form-field class="w-full">
+        <mat-label>First name</mat-label>
+        <input matInput formControlName="firstName" />
+      </mat-form-field>
+    </div>
+    <div class="flex-auto">
+      <mat-form-field class="w-full">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" />
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-form-field class="w-full">
+    <mat-label>Mobile Number</mat-label>
+    <span matPrefix>+61 &nbsp;</span>
+    <input type="tel" matInput placeholder="" formControlName="mobileNumber" />
+  </mat-form-field>
+
+  <mat-form-field class="w-full">
+    <mat-label>Email</mat-label>
+    <input type="email" matInput formControlName="email" />
+  </mat-form-field>
+</form>

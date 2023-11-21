@@ -1,0 +1,50 @@
+<div
+  class="p-4 border-2 border-solid rounded-lg mt-4 bg-white"
+  *ngFor="let control of applicantsFormGroupKeys()"
+>
+  <div class="flex w-full">
+    <div class="flex w-full">
+      <form [formGroup]="primaryApplicantFormGroup">
+        <mat-checkbox class="m-2" [formControlName]="control"
+          >Primary applicant</mat-checkbox
+        >
+      </form>
+    </div>
+    <div class="flex pb-2 flex-row-reverse">
+      <button
+        *ngIf="numApplicants > 1"
+        mat-icon-button
+        color="primary"
+        aria-label="Remove this applicant"
+        (click)="removeApplicantControl(control)"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+  <form [formGroup]="applicantsFormGroup">
+    <app-applicant-form [formControlName]="control"></app-applicant-form>
+  </form>
+</div>
+<div class="w-full flex justify-center">
+  <button
+    class="p-2"
+    mat-icon-button
+    color="primary"
+    aria-label="Add another applicant"
+    (click)="addAnotherApplicants()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
+
+<div class="w-full flex justify-center pt-10">
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="!applicantsFormGroup.valid"
+  >
+    Submit to console
+  </button>
+</div>
